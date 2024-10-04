@@ -1,101 +1,104 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const flashcards = [
+  {
+    id: 1,
+    term: "React",
+    definition: "A JavaScript library for building user interfaces",
+  },
+  { id: 2, term: "Component", definition: "A reusable piece of UI in React" },
+  {
+    id: 3,
+    term: "State",
+    definition: "An object that holds data that may change over time",
+  },
+  {
+    id: 4,
+    term: "Props",
+    definition: "Arguments passed into React components",
+  },
+  {
+    id: 5,
+    term: "Hook",
+    definition:
+      "Functions that let you use state and other React features without writing a class",
+  },
+];
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleNext = () => {
+    if (currentIndex < flashcards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-4">
+      <div className="w-full max-w-md">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.3 }}
+            onClick={handleFlip}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <motion.div
+              animate={{ rotateY: isFlipped ? 180 : 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-full h-64 p-6 flex items-center justify-center bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
+            >
+              {!isFlipped ? (
+                <p className="text-xl text-center">
+                  {flashcards[currentIndex].definition}
+                </p>
+              ) : (
+                <p
+                  className="text-3xl font-bold text-center"
+                  style={{ transform: "rotateY(180deg)" }}
+                >
+                  {flashcards[currentIndex].term}
+                </p>
+              )}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+        <div className="flex justify-between mt-6">
+          <Button onClick={handlePrevious} disabled={currentIndex === 0}>
+            <ChevronLeftIcon className="mr-2 h-4 w-4" /> Previous
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={currentIndex === flashcards.length - 1}
           >
-            Read our docs
-          </a>
+            Next <ChevronRightIcon className="ml-2 h-4 w-4" />
+          </Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Card {currentIndex + 1} of {flashcards.length}
+        </p>
+      </div>
     </div>
   );
 }
