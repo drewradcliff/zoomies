@@ -62,25 +62,33 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.3 }}
+            className="relative w-full h-64"
             onClick={handleFlip}
           >
             <motion.div
+              className="w-full h-full absolute"
+              initial={false}
               animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 0.5 }}
-              className="w-full h-64 p-6 flex items-center justify-center bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
+              transition={{ duration: 0.6 }}
+              style={{
+                transformStyle: "preserve-3d",
+              }}
             >
-              {!isFlipped ? (
+              <div className="w-full h-full flex items-center justify-center bg-white rounded-xl shadow-lg p-6 absolute backface-hidden">
                 <p className="text-xl text-center">
                   {flashcards[currentIndex].definition}
                 </p>
-              ) : (
-                <p
-                  className="text-3xl font-bold text-center"
-                  style={{ transform: "rotateY(180deg)" }}
-                >
+              </div>
+              <div
+                className="w-full h-full flex items-center justify-center bg-white rounded-xl shadow-lg p-6 absolute backface-hidden"
+                style={{
+                  transform: "rotateY(180deg)",
+                }}
+              >
+                <p className="text-3xl font-bold text-center">
                   {flashcards[currentIndex].term}
                 </p>
-              )}
+              </div>
             </motion.div>
           </motion.div>
         </AnimatePresence>

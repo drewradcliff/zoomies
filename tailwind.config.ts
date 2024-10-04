@@ -1,4 +1,16 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
+
+const customUtilities = plugin(({ addUtilities }) => {
+  addUtilities({
+    ".backface-visible": {
+      "backface-visibility": "visible",
+    },
+    ".backface-hidden": {
+      "backface-visibility": "hidden",
+    },
+  });
+});
 
 const config: Config = {
   darkMode: ["class"],
@@ -58,6 +70,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), customUtilities],
 };
 export default config;
