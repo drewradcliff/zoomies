@@ -1,56 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getFlashcards } from "@/lib/get-flashcards";
 
-const flashcards = [
-  {
-    id: 1,
-    term: "React",
-    definition: "A JavaScript library for building user interfaces",
-  },
-  { id: 2, term: "Component", definition: "A reusable piece of UI in React" },
-  {
-    id: 3,
-    term: "State",
-    definition: "An object that holds data that may change over time",
-  },
-  {
-    id: 4,
-    term: "Props",
-    definition: "Arguments passed into React components",
-  },
-  {
-    id: 5,
-    term: "Hook",
-    definition:
-      "Functions that let you use state and other React features without writing a class",
-  },
-];
+const interests = ["science", "music", "technology"] as const;
 
 export default function Home() {
+  const [data, setData] = useState<Awaited<ReturnType<typeof getFlashcards>>>();
+  const [error, setError] = useState<unknown>();
+  const [loading, setLoading] = useState(false);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  const handleNext = () => {
-    if (currentIndex < flashcards.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsFlipped(false);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setIsFlipped(false);
-    }
-  };
-
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
+  useEffect(() => {
+    setLoading(true);
+    getFlashcards(5, interests)
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200 p-4">
@@ -63,7 +35,9 @@ export default function Home() {
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.3 }}
             className="relative h-64 w-full"
-            onClick={handleFlip}
+            onClick={() => {
+              setIsFlipped(!isFlipped);
+            }}
           >
             <motion.div
               className="absolute h-full w-full"
@@ -76,7 +50,11 @@ export default function Home() {
             >
               <div className="absolute flex h-full w-full items-center justify-center rounded-xl bg-white p-6 shadow-lg backface-hidden">
                 <p className="text-center text-xl">
-                  {flashcards[currentIndex]?.definition}
+                  {data?.[currentIndex]?.question}
+                  <br />
+                  <span className="text-sm text-gray-600">
+                    {data?.[currentIndex]?.category}
+                  </span>
                 </p>
               </div>
               <div
@@ -86,25 +64,38 @@ export default function Home() {
                 }}
               >
                 <p className="text-center text-3xl font-bold">
-                  {flashcards[currentIndex]?.term}
+                  {data?.[currentIndex]?.answer}
                 </p>
               </div>
             </motion.div>
           </motion.div>
         </AnimatePresence>
         <div className="mt-6 flex justify-between">
-          <Button onClick={handlePrevious} disabled={currentIndex === 0}>
+          <Button
+            disabled={!data || currentIndex === 0}
+            onClick={() => {
+              setCurrentIndex(currentIndex - 1);
+              setIsFlipped(false);
+            }}
+          >
             <ChevronLeftIcon className="mr-2 h-4 w-4" /> Previous
           </Button>
           <Button
-            onClick={handleNext}
-            disabled={currentIndex === flashcards.length - 1}
+            disabled={!data || currentIndex === data.length - 1}
+            onClick={() => {
+              setCurrentIndex(currentIndex + 1);
+              setIsFlipped(false);
+            }}
           >
             Next <ChevronRightIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
         <p className="mt-4 text-center text-sm text-gray-600">
-          Card {currentIndex + 1} of {flashcards.length}
+          {loading
+            ? "loading..."
+            : !data
+              ? `error... ${error}`
+              : `${currentIndex + 1} of ${data.length}`}
         </p>
       </div>
     </div>
