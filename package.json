@@ -7,7 +7,6 @@
     "dev": "next dev",
     "format": "prettier --cache --write .",
     "lint": "next lint",
-    "prepare": "husky",
     "start": "next start"
   },
   "prettier": {
@@ -49,8 +48,6 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^8",
     "eslint-config-next": "14.2.14",
-    "husky": "^9.1.6",
-    "lint-staged": "^15.2.10",
     "postcss": "^8",
     "prettier": "^3.3.3",
     "prettier-plugin-packagejson": "^2.5.2",
