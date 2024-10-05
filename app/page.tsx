@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getFlashcards } from "@/lib/get-flashcards";
+import { getTriviaDeck } from "@/lib/get-trivia-deck";
 
 const interests = ["science", "music", "technology"] as const;
 
 export default function Home() {
-  const [data, setData] = useState<Awaited<ReturnType<typeof getFlashcards>>>();
+  const [data, setData] = useState<Awaited<ReturnType<typeof getTriviaDeck>>>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(false);
 
@@ -18,9 +18,9 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    getFlashcards(5, interests)
+    getTriviaDeck(5, interests)
       .then(setData)
-      .catch(setError)
+      .catch((err) => setError(err instanceof Error ? err.message : err))
       .finally(() => setLoading(false));
   }, []);
 
