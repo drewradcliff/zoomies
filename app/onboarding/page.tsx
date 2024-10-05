@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const interests = [
   { id: "science", label: "Science" },
@@ -32,7 +32,7 @@ export default function Onboarding() {
     setSelectedInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+        : [...prev, interest],
     );
   };
 
@@ -43,7 +43,7 @@ export default function Onboarding() {
   };
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="mx-auto w-full max-w-lg">
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Welcome aboard!</CardTitle>
