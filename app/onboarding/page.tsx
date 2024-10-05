@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocalStorage } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,23 +13,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Key, Category } from "@/lib/constants";
 
-const interests = [
-  { id: "science", label: "Science" },
-  { id: "math", label: "Math" },
-  { id: "history", label: "History" },
-  { id: "literature", label: "Literature" },
-  { id: "art", label: "Art" },
-  { id: "music", label: "Music" },
-  { id: "technology", label: "Technology" },
-  { id: "sports", label: "Sports" },
-];
+const choices = Object.values(Category);
 
 export default function Onboarding() {
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<Category[]>([]);
+  const [, setInterests] = useLocalStorage<Category[]>(Key.INTERESTS, []);
   const router = useRouter();
 
-  const handleInterestChange = (interest: string) => {
+  const handleInterestChange = (interest: Category) => {
     setSelectedInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
@@ -38,7 +32,7 @@ export default function Onboarding() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("userInterests", JSON.stringify(selectedInterests));
+    setInterests(selectedInterests);
     router.push("/");
   };
 
@@ -53,18 +47,18 @@ export default function Onboarding() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
-            {interests.map((interest) => (
-              <div key={interest.id} className="flex items-center space-x-2">
+            {choices.map((category) => (
+              <div key={category} className="flex items-center space-x-2">
                 <Checkbox
-                  id={interest.id}
-                  checked={selectedInterests.includes(interest.id)}
-                  onCheckedChange={() => handleInterestChange(interest.id)}
+                  id={category}
+                  checked={selectedInterests.includes(category)}
+                  onCheckedChange={() => handleInterestChange(category)}
                 />
                 <label
-                  htmlFor={interest.id}
-                  className="text-sm font-medium leading-none"
+                  htmlFor={category}
+                  className="text-sm font-medium leading-none capitalize"
                 >
-                  {interest.label}
+                  {category}
                 </label>
               </div>
             ))}
