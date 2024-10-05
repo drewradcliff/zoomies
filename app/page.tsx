@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -95,6 +96,15 @@ export default function Home() {
               <p className="text-center text-3xl font-bold">
                 {flashcards[currentIndex]?.term}
               </p>
+              <Button
+                className="absolute bottom-5 right-5 text-zinc-500"
+                variant="link"
+                asChild
+              >
+                <Link onClick={(e) => e.stopPropagation()} href="/chat">
+                  Chat with Nano
+                </Link>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
