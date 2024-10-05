@@ -11,7 +11,7 @@ import { getTriviaDeck } from "@/lib/get-trivia-deck";
 
 export default function Home() {
   const [data, setData] = useState<Awaited<ReturnType<typeof getTriviaDeck>>>();
-  const [error, setError] = useState<unknown>();
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const interests = useReadLocalStorage<Category[]>(Key.INTERESTS);
 
@@ -23,10 +23,14 @@ export default function Home() {
     if (!interests) {
       router.push("/onboarding");
     } else {
+      setError(false);
       setLoading(true);
       getTriviaDeck(5, interests)
         .then(setData)
-        .catch(setError)
+        .catch((error) => {
+          setError(true);
+          console.error(error);
+        })
         .finally(() => setLoading(false));
     }
   }, [interests, router]);
@@ -99,9 +103,9 @@ export default function Home() {
       <p className="mt-4 text-center text-sm text-gray-600">
         {loading
           ? "loading..."
-          : !data
-            ? `error... ${error}`
-            : `${currentIndex + 1} of ${data.length}`}
+          : error
+            ? "oops! something went wrong. check the console..."
+            : `${currentIndex + 1} of ${data?.length}`}
       </p>
     </div>
   );
