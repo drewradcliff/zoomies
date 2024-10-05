@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,13 @@ const flashcards = [
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!localStorage.getItem("userInterests")) {
+      router.push("/onboarding");
+    }
+  }, [router]);
 
   const handleNext = () => {
     if (currentIndex < flashcards.length - 1) {
@@ -53,60 +61,58 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-4">
-      <div className="w-full max-w-md">
-        <AnimatePresence mode="wait">
+    <div className="w-full max-w-md">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          transition={{ duration: 0.3 }}
+          className="relative w-full h-64"
+          onClick={handleFlip}
+        >
           <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.3 }}
-            className="relative w-full h-64"
-            onClick={handleFlip}
+            className="w-full h-full absolute"
+            initial={false}
+            animate={{ rotateY: isFlipped ? 180 : 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              transformStyle: "preserve-3d",
+            }}
           >
-            <motion.div
-              className="w-full h-full absolute"
-              initial={false}
-              animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 0.6 }}
+            <div className="w-full h-full flex items-center justify-center bg-white rounded-xl shadow-lg p-6 absolute backface-hidden">
+              <p className="text-xl text-center">
+                {flashcards[currentIndex].definition}
+              </p>
+            </div>
+            <div
+              className="w-full h-full flex items-center justify-center bg-white rounded-xl shadow-lg p-6 absolute backface-hidden"
               style={{
-                transformStyle: "preserve-3d",
+                transform: "rotateY(180deg)",
               }}
             >
-              <div className="w-full h-full flex items-center justify-center bg-white rounded-xl shadow-lg p-6 absolute backface-hidden">
-                <p className="text-xl text-center">
-                  {flashcards[currentIndex].definition}
-                </p>
-              </div>
-              <div
-                className="w-full h-full flex items-center justify-center bg-white rounded-xl shadow-lg p-6 absolute backface-hidden"
-                style={{
-                  transform: "rotateY(180deg)",
-                }}
-              >
-                <p className="text-3xl font-bold text-center">
-                  {flashcards[currentIndex].term}
-                </p>
-              </div>
-            </motion.div>
+              <p className="text-3xl font-bold text-center">
+                {flashcards[currentIndex].term}
+              </p>
+            </div>
           </motion.div>
-        </AnimatePresence>
-        <div className="flex justify-between mt-6">
-          <Button onClick={handlePrevious} disabled={currentIndex === 0}>
-            <ChevronLeftIcon className="mr-2 h-4 w-4" /> Previous
-          </Button>
-          <Button
-            onClick={handleNext}
-            disabled={currentIndex === flashcards.length - 1}
-          >
-            Next <ChevronRightIcon className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-        <p className="text-center mt-4 text-sm text-gray-600">
-          Card {currentIndex + 1} of {flashcards.length}
-        </p>
+        </motion.div>
+      </AnimatePresence>
+      <div className="flex justify-between mt-6">
+        <Button onClick={handlePrevious} disabled={currentIndex === 0}>
+          <ChevronLeftIcon className="mr-2 h-4 w-4" /> Previous
+        </Button>
+        <Button
+          onClick={handleNext}
+          disabled={currentIndex === flashcards.length - 1}
+        >
+          Next <ChevronRightIcon className="ml-2 h-4 w-4" />
+        </Button>
       </div>
+      <p className="text-center mt-4 text-sm text-gray-600">
+        Card {currentIndex + 1} of {flashcards.length}
+      </p>
     </div>
   );
 }
