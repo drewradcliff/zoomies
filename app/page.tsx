@@ -4,33 +4,32 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useReadLocalStorage } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
+import { Key, type Category } from "@/lib/constants";
 import { getTriviaDeck } from "@/lib/get-trivia-deck";
-
-const interests = ["science", "music", "technology"] as const;
 
 export default function Home() {
   const [data, setData] = useState<Awaited<ReturnType<typeof getTriviaDeck>>>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(false);
+  const interests = useReadLocalStorage<Category[]>(Key.INTERESTS);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (!localStorage.getItem("userInterests")) {
+    if (!interests) {
       router.push("/onboarding");
+    } else {
+      setLoading(true);
+      getTriviaDeck(5, interests)
+        .then(setData)
+        .catch(setError)
+        .finally(() => setLoading(false));
     }
-  }, [router]);
-
-  useEffect(() => {
-    setLoading(true);
-    getTriviaDeck(5, interests)
-      .then(setData)
-      .catch((err) => setError(err instanceof Error ? err.message : err))
-      .finally(() => setLoading(false));
-  }, []);
+  }, [interests, router]);
 
   return (
     <div className="w-full max-w-md">

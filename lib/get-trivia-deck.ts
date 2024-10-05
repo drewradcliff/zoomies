@@ -2,16 +2,7 @@ import { generateObject } from "ai";
 import { chromeai } from "chrome-ai";
 import _ from "lodash";
 import { z } from "zod";
-
-type Category =
-  | "science"
-  | "math"
-  | "history"
-  | "literature"
-  | "art"
-  | "music"
-  | "technology"
-  | "sports";
+import type { Category } from "./constants";
 
 async function getTrivia(category: Category) {
   const { object: trivia } = await generateObject({
@@ -28,10 +19,7 @@ async function getTrivia(category: Category) {
   return { ...trivia, category };
 }
 
-export async function getTriviaDeck(
-  count: number,
-  interests: readonly [Category, ...Category[]],
-) {
+export async function getTriviaDeck(count: number, interests: Category[]) {
   const categories = _.map(Array(count), () => _.sample(interests));
-  return Array.fromAsync(categories, getTrivia);
+  return Array.fromAsync(categories, (c) => c && getTrivia(c));
 }
