@@ -72,7 +72,7 @@ export default function Onboarding() {
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full">
-            Complete Onboarding
+            Continue
           </Button>
         </CardFooter>
       </form>
