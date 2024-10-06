@@ -1,32 +1,69 @@
+"use client";
+
+import { useState } from "react";
 import { Avatar } from "@radix-ui/react-avatar";
+import { streamText, type CoreMessage } from "ai";
+import { chromeai } from "chrome-ai";
 import { SendIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const messages = [
-  { id: 1, content: "ping", role: "user" },
-  { id: 2, content: "pong", role: "bot" },
-];
-
 export default function Chat() {
+  const [input, setInput] = useState("");
+  const searchParams = useSearchParams();
+  const answer = searchParams.get("answer");
+  const [messages, setMessages] = useState<CoreMessage[]>([
+    {
+      content: `Hello! I'm Nano, your personal assistant. Would you like to know more about ${answer}?`,
+      role: "assistant",
+    },
+  ]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input) return;
+    const newMessages: CoreMessage[] = [
+      ...messages,
+      { content: input, role: "user" },
+    ];
+    setMessages(newMessages);
+    setInput("");
+    try {
+      const { textStream } = await streamText({
+        model: chromeai(),
+        system:
+          "You are an assistent. Answer the user's questions about " + answer,
+        prompt: "User: " + input,
+      });
+      let t = "";
+      for await (const message of textStream) {
+        t = t.concat(message);
+        setMessages([...newMessages, { content: t, role: "assistant" }]);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
-    <Card className="mx-auto w-full max-w-lg">
+    <Card className="mx-auto flex max-h-[80vh] w-full max-w-lg flex-col">
       <CardHeader>
         <CardTitle>Chat with Nano</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea>
-          {messages.map((message) => (
+      <CardContent className="flex flex-1 flex-col overflow-auto">
+        <ScrollArea className="mb-4 flex-1 pr-4">
+          {messages.map(({ content, role }, idx) => (
             <div
-              key={message.id}
+              key={idx}
               className={`flex items-center gap-3 pb-4 ${
-                message.role === "user" ? "justify-end" : "justify-start"
+                role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {message.role !== "user" && (
+              {role !== "user" && (
                 <Avatar>
                   <AvatarImage src="/ai-avatar.png" alt="AI" />
                   <AvatarFallback className="h-8 w-8">AI</AvatarFallback>
@@ -34,14 +71,14 @@ export default function Chat() {
               )}
               <div
                 className={`rounded-3xl px-4 py-2 ${
-                  message.role === "user"
+                  role === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
                 }`}
               >
-                {message.content}
+                {content as string}
               </div>
-              {message.role === "user" && (
+              {role === "user" && (
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder-user.jpg" alt="User" />
                   <AvatarFallback>U</AvatarFallback>
@@ -50,16 +87,21 @@ export default function Chat() {
             </div>
           ))}
         </ScrollArea>
-        <div className="relative">
-          <Input placeholder="Type your message..." />
+        <form className="relative" onSubmit={handleSubmit}>
+          <Input
+            placeholder="Enter your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
           <Button
+            type="submit"
             variant="link"
             size="icon"
             className="absolute right-3 top-1/2 -translate-y-1/2"
           >
             <SendIcon className="h-5 w-5" />
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );
