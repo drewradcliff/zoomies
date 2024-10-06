@@ -50,12 +50,12 @@ export default function Chat() {
   };
 
   return (
-    <Card className="mx-auto flex max-h-[80vh] w-full max-w-lg flex-col">
+    <Card className="mx-auto w-full max-w-lg">
       <CardHeader>
         <CardTitle>Chat with Nano</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col overflow-auto">
-        <ScrollArea className="mb-4 flex-1 pr-4">
+      <CardContent>
+        <ScrollArea className="mb-4 flex max-h-[75vh] min-h-full flex-col pr-4">
           {messages.map(({ content, role }, idx) => (
             <div
               key={idx}
