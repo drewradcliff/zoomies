@@ -10,5 +10,6 @@ export enum Category {
 }
 
 export enum Key {
+  DECK = "deck",
   INTERESTS = "interests",
 }
