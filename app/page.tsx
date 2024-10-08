@@ -1,40 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useReadLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
 import { Key, type Category } from "@/lib/constants";
-import { getTriviaDeck } from "@/lib/get-trivia-deck";
+import { getCards } from "@/lib/get-trivia-deck";
 
-export default function Home() {
-  const [data, setData] = useState<Awaited<ReturnType<typeof getTriviaDeck>>>();
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const interests = useReadLocalStorage<Category[]>(Key.INTERESTS);
-
+export default function HomePage() {
+  const [interests] = useLocalStorage<Category[]>(Key.INTERESTS, []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const router = useRouter();
 
+  const query = useQuery({
+    enabled: !!interests?.length,
+    queryKey: ["cards"],
+    queryFn: () => getCards(5, interests),
+  });
+
   useEffect(() => {
-    if (!interests) {
-      router.push("/onboarding");
-    } else {
-      setError(false);
-      setLoading(true);
-      getTriviaDeck(5, interests)
-        .then(setData)
-        .catch((error) => {
-          setError(true);
-          console.error(error);
-        })
-        .finally(() => setLoading(false));
-    }
+    if (!!interests?.length) return;
+    router.push("/onboarding");
   }, [interests, router]);
+
+  if (query.isPending) {
+    return <p className="text-center">loading...</p>;
+  }
+
+  if (query.isError) {
+    console.error(query.error);
+    return (
+      <p className="text-center">
+        oops! something went wrong. check the console...
+      </p>
+    );
+  }
 
   return (
     <div className="w-full max-w-md">
@@ -61,10 +66,10 @@ export default function Home() {
           >
             <div className="absolute flex h-full w-full items-center justify-center rounded-xl bg-white p-6 shadow-lg backface-hidden">
               <p className="text-center text-xl">
-                {data?.[currentIndex]?.question}
+                {query.data[currentIndex]?.question}
                 <br />
                 <span className="text-sm text-gray-600">
-                  {data?.[currentIndex]?.category}
+                  {query.data[currentIndex]?.category}
                 </span>
               </p>
             </div>
@@ -75,7 +80,7 @@ export default function Home() {
               }}
             >
               <p className="text-center text-3xl font-bold">
-                {data?.[currentIndex]?.answer}
+                {query.data[currentIndex]?.answer}
               </p>
               <Button
                 className="absolute bottom-5 right-5 text-zinc-500"
@@ -98,7 +103,7 @@ export default function Home() {
       </AnimatePresence>
       <div className="mt-6 flex justify-between">
         <Button
-          disabled={!data || currentIndex === 0}
+          disabled={currentIndex === 0}
           onClick={() => {
             setCurrentIndex(currentIndex - 1);
             setIsFlipped(false);
@@ -107,7 +112,7 @@ export default function Home() {
           <ChevronLeftIcon className="mr-2 h-4 w-4" /> Previous
         </Button>
         <Button
-          disabled={!data || currentIndex === data.length - 1}
+          disabled={currentIndex === query.data.length - 1}
           onClick={() => {
             setCurrentIndex(currentIndex + 1);
             setIsFlipped(false);
@@ -117,11 +122,7 @@ export default function Home() {
         </Button>
       </div>
       <p className="mt-4 text-center text-sm text-gray-600">
-        {loading
-          ? "loading..."
-          : error
-            ? "oops! something went wrong. check the console..."
-            : `${currentIndex + 1} of ${data?.length}`}
+        {`${currentIndex + 1} of ${query.data.length}`}
       </p>
     </div>
   );

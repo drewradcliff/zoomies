@@ -13,32 +13,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Key, Category } from "@/lib/constants";
+import { Category, Key } from "@/lib/constants";
 
 const choices = Object.values(Category);
 
-export default function Onboarding() {
+export default function OnboardingPage() {
+  const router = useRouter();
   const [selectedInterests, setSelectedInterests] = useState<Category[]>([]);
   const [, setInterests] = useLocalStorage<Category[]>(Key.INTERESTS, []);
-  const router = useRouter();
-
-  const handleInterestChange = (interest: Category) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)
-        : [...prev, interest],
-    );
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setInterests(selectedInterests);
-    router.push("/");
-  };
 
   return (
     <Card className="mx-auto w-full max-w-lg">
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          setInterests(selectedInterests);
+          router.replace("/");
+        }}
+      >
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Welcome aboard!</CardTitle>
           <CardDescription>
@@ -52,11 +44,17 @@ export default function Onboarding() {
                 <Checkbox
                   id={category}
                   checked={selectedInterests.includes(category)}
-                  onCheckedChange={() => handleInterestChange(category)}
+                  onCheckedChange={() => {
+                    setSelectedInterests((prev) =>
+                      prev.includes(category)
+                        ? prev.filter((interest) => interest !== category)
+                        : prev.concat(category),
+                    );
+                  }}
                 />
                 <label
                   htmlFor={category}
-                  className="text-sm font-medium leading-none capitalize"
+                  className="text-sm font-medium capitalize leading-none"
                 >
                   {category}
                 </label>
