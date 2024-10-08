@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocalStorage } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,18 @@ export default function HomePage() {
               <p className="text-center text-3xl font-bold">
                 {query.data[currentIndex]?.answer}
               </p>
+              <Button
+                className="absolute bottom-5 right-5 text-zinc-500"
+                variant="link"
+                asChild
+              >
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={"/chat/" + query.data[currentIndex]?.id}
+                >
+                  Chat with Nano
+                </Link>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
