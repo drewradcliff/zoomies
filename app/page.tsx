@@ -89,10 +89,7 @@ export default function HomePage() {
               >
                 <Link
                   onClick={(e) => e.stopPropagation()}
-                  href={{
-                    pathname: "/chat",
-                    query: { answer: data?.[currentIndex]?.answer },
-                  }}
+                  href={"/chat/" + query.data[currentIndex]?.id}
                 >
                   Chat with Nano
                 </Link>

@@ -61,7 +61,18 @@ export async function getCards(count: number, interests: Category[]) {
       throw new Error("missing category");
     }
     let trivia = await getTrivia(category);
-    while (deck.value.some((card) => _.isEqual(card, trivia))) {
+    while (
+      deck.value.some(
+        (card) =>
+          _.isEqual(
+            _.deburr(_.toLower(_.trim(card.answer))).replace(/[^a-z0-9]/g, ""),
+            _.deburr(_.toLower(_.trim(trivia.answer))).replace(
+              /[^a-z0-9]/g,
+              "",
+            ),
+          ) && card.date === trivia.date,
+      )
+    ) {
       trivia = await getTrivia(category);
     }
     deck.value = deck.value.concat(trivia);
