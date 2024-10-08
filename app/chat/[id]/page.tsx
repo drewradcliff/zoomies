@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@radix-ui/react-avatar";
 import { streamText, type CoreMessage } from "ai";
 import { chromeai } from "chrome-ai";
@@ -11,7 +11,6 @@ import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Key } from "@/lib/constants";
 import type { Trivia } from "@/lib/get-trivia-deck";
 
@@ -26,6 +25,14 @@ export default function Chat({ params }: { params: { id: string } }) {
     },
   ]);
 
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input) return;
@@ -38,9 +45,7 @@ export default function Chat({ params }: { params: { id: string } }) {
     try {
       const { textStream } = await streamText({
         model: chromeai(),
-        system:
-          "You are an assistent. Answer the user's questions about " +
-          card?.answer,
+        system: `You are an assistant. Answer the user's questions about the answer to this trivia question: "Question: ${card?.question} Answer: ${card?.answer}"`,
         prompt: "User: " + input,
       });
       let t = "";
@@ -61,7 +66,10 @@ export default function Chat({ params }: { params: { id: string } }) {
         <CardTitle>Chat with Nano</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="mb-4 flex max-h-[75vh] min-h-full flex-col pr-4">
+        <div
+          className="mb-4 flex max-h-[75vh] min-h-full flex-col overflow-auto pr-4"
+          ref={scrollAreaRef}
+        >
           {messages.map(({ content, role }, idx) => (
             <div
               key={idx}
@@ -92,7 +100,7 @@ export default function Chat({ params }: { params: { id: string } }) {
               )}
             </div>
           ))}
-        </ScrollArea>
+        </div>
         <form className="relative" onSubmit={handleSubmit}>
           <Input
             placeholder="Enter your message..."
